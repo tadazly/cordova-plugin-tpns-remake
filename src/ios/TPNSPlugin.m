@@ -1,5 +1,4 @@
 #import "TPNSPlugin.h"
-#import "TPNSCommonMethod.h"
 
 @implementation TPNSPlugin
 
@@ -42,12 +41,12 @@
     }
     // [[XGPush defaultManager] configureClusterDomainName:currentDomainName];
     //过滤配置的DomainName与AccessID不匹配问题
-    NSInteger accessID = self.tpnsAccessID != 0 ? self.tpnsAccessID : [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];;
-    if (![TPNSCommonMethod isMatchingDomainName:currentDomainName withAccessID:accessID]) {
-        NSLog(@"%@",NSLocalizedString(@"domainname_accessid_not_match", nil));
-    } else {
-        self.currentDomainName = currentDomainName;
-    }
+    NSInteger accessID = self.tpnsAccessID != 0 ? self.tpnsAccessID : [[[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"] integerValue];
+    // if (![TPNSCommonMethod isMatchingDomainName:currentDomainName withAccessID:accessID]) {
+    //     NSLog(@"%@",NSLocalizedString(@"domainname_accessid_not_match", nil));
+    // } else {
+    //     self.currentDomainName = currentDomainName;
+    // }
 }
 
 - (void)startXG:(CDVInvokedUrlCommand *)command
@@ -55,14 +54,14 @@
     if (self.isTPNSRegistSuccess) {
         //已经注册成功，避免重复注册；如需重新注册，先注销，后注册。
         NSString *message = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"register_app", nil), NSLocalizedString(@"success", nil)];
-        [TPNSCommonMethod showAlertViewWithText:message];
+        // [TPNSCommonMethod showAlertViewWithText:message];
         return;
     }
-    NSInterger accessID = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];
+    NSInteger accessID = [[[self.commandDelegate settings] objectForKey:@"tpns_access_id"] integerValue];
     if (self.tpnsAccessID != 0) {
         accessID = self.tpnsAccessID;
     }
-    NSString *accessKey = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_KEY"];
+    NSString *accessKey = [[self.commandDelegate settings] objectForKey:@"tpns_access_key"];
     if (self.tpnsAccessKey != nil && ![self.tpnsAccessKey isEqualToString:@""]) {
         accessKey = self.tpnsAccessKey;
     }
@@ -79,9 +78,7 @@
 
     /// 角标数目清零,通知中心清空
     if ([XGPush defaultManager].xgApplicationBadgeNumber > 0) {
-        TPNS_DISPATCH_MAIN_SYNC_SAFE(^{
-            [XGPush defaultManager].xgApplicationBadgeNumber = 0;
-        });
+        [XGPush defaultManager].xgApplicationBadgeNumber = 0;
     }
 }
 
@@ -91,7 +88,7 @@
     [[XGPush defaultManager] stopXGNotification];
 }
 
-- (NSString)getToken:(CDVInvokedUrlCommand *)command
+- (void)getToken:(CDVInvokedUrlCommand *)command
 {
     NSString *token = [[XGPushTokenManager defaultTokenManager] xgTokenString];
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
@@ -100,17 +97,17 @@
 
 - (void)setBadge:(CDVInvokedUrlCommand *)command
 {
-    NSInteger value = command.arguments objectAtIndex:0];
-    [[XGPush defaultManager] setBadge:num];
+    NSInteger value = [command.arguments objectAtIndex:0];
+    [[XGPush defaultManager] setBadge:value];
 }
 
-- (nonnull NSString *)getSdkVersion:(CDVInvokedUrlCommand *)command
+- (void)getSdkVersion:(CDVInvokedUrlCommand *)command
 {
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[[XGPush defaultManager] sdkVersion]];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-- (BOOL)clearTPNSCache:(CDVInvokedUrlCommand *)command
+- (void)clearTPNSCache:(CDVInvokedUrlCommand *)command
 {
     [[XGPush defaultManager] clearTPNSCache];
 }
@@ -118,18 +115,18 @@
 - (void)deviceNotificationIsAllowed:(CDVInvokedUrlCommand *)command
 {
     [[XGPush defaultManager] deviceNotificationIsAllowed:^(BOOL isAllowed) {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isAllowed]];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isAllowed];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
 
 - (void)uploadLogCompletionHandler:(CDVInvokedUrlCommand *)command
 {
-    [[XGPush defaultManager] uploadLogCompletionHandler:(nullable void(^)(BOOL result,  NSString * _Nullable errorMessage)) {
+    [[XGPush defaultManager] uploadLogCompletionHandler:^(BOOL result,  NSString * _Nullable errorMessage) {
         NSDictionary *response = @{
-            @"result": result,
+            @"result": @(result),
             @"errorMsg": errorMessage
-        }
+        };
         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
         [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     }];
@@ -156,11 +153,11 @@
         response = @{
             @"deviceToken": deviceToken != nil ? deviceToken : @"",
             @"xgToken": xgToken != nil ? xgToken : @"",
-            @"errorCode": 0
+            @"errorCode": @(0)
         };
     } else {
         response = @{
-            @"errorCode": 1001,
+            @"errorCode": @(1001),
             @"errorMsg": @"注册成功回掉内失败"
         };
     }
@@ -178,9 +175,9 @@
     NSLog(@"%s, errorCode:%ld, errMsg:%@", __FUNCTION__, (long)error.code, error.localizedDescription);
 
     NSDictionary *response = @{
-        @"errorCode": error.code,
+        @"errorCode": @(error.code),
         @"errorMsg": error.localizedDescription
-    }
+    };
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
     [self.commandDelegate sendPluginResult:commandResult callbackId:self.currentStartCallbackId];
     self.currentStartCallbackId = nil;
@@ -196,13 +193,13 @@
     if (!error) {
         self.isTPNSRegistSuccess = false;
         NSDictionary *response = @{
-            @"errorCode": 0
-        }
+            @"errorCode": @(0)
+        };
     } else {
         NSDictionary *response = @{
-            @"errorCode": 1001,
+            @"errorCode": @(1001),
             @"errorMsg": @"注销回掉内失败"
-        }
+        };
     }
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
     [self.commandDelegate sendPluginResult:commandResult callbackId:self.currentStopCallbackId];
@@ -256,19 +253,19 @@
 /// TPNS网络连接成功
 - (void)xgPushNetworkConnected {
     NSLog(@"TPNS connection connected.");
-    if (_launchTag) {
+    if (self.launchTag) {
         /// 重置应用角标，-1不清空通知栏，0清空通知栏
         [XGPush defaultManager].xgApplicationBadgeNumber = -1;
         /// 重置服务端自动+1基数
         [[XGPush defaultManager] setBadge:0];
-        _launchTag = NO;
+        self.launchTag = NO;
     }
 }
 
 /// TPNS网络连接断开
 - (void)xgPushNetworkDisconnected {
     NSLog(@"TPNS connection disconnected.");
-    self._launchTag = YES;
+    self.launchTag = YES;
 }
 
 /// 销毁资源

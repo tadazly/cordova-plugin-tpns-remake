@@ -2,37 +2,41 @@
 #import "XGPush.h"
 #import "XGPushPrivate.h"
 
+#define TPNS_DOMAIN_GZ_DEFAULT @"tpns.tencent.com"
+#define TPNS_DOMAIN_HK @"tpns.hk.tencent.com"
+#define TPNS_DOMAIN_SGP @"tpns.sgp.tencent.com"
+#define TPNS_DOMAIN_SH @"tpns.sh.tencent.com"
+
 @interface TPNSPlugin : CDVPlugin
 
-@property (nonatomic, strong) NSString *currentDomainName;
-@property (nonatomic, strong) NSString *currentStartCallbackId;
-@property (nonatomic, strong) NSString *currentStopCallbackId;
+@property (nonatomic, strong, nonnull) NSString *currentDomainName;
+@property (nonatomic, strong, nullable) NSString *currentStartCallbackId;
+@property (nonatomic, strong, nullable) NSString *currentStopCallbackId;
 @property (nonatomic, assign) NSInteger tpnsAccessID;
-@property (nonatomic, assign) NSString *tpnsAccessKey;
+@property (nonatomic, assign, nullable) NSString *tpnsAccessKey;
 @property (nonatomic, assign) BOOL isTPNSRegistSuccess;
 @property (nonatomic, assign) BOOL launchTag;
 
 /// 设置开启关闭调试
-- (void)setEnableDebug:(CDVInvokedUrlCommand *)command;
+- (void)setEnableDebug:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 可选手动设置accessID和key
-- (void)setAccessInfo:(CDVInvokedUrlCommand *)command;
+- (void)setAccessInfo:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 设置host
-- (void)setConfigHost:(CDVInvokedUrlCommand *)command;
+- (void)setConfigHost:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 开启入口（停止后需要再次调用）
-- (void)startXG:(CDVInvokedUrlCommand *)command;
+- (void)startXG:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 停止推送
-- (void)stopXG:(CDVInvokedUrlCommand *)command;
+- (void)stopXG:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 查询Token
-- (NSString)getToken:(CDVInvokedUrlCommand *)command;
-
+- (void)getToken:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 同步角标
-- (void)setBadge:(CDVInvokedUrlCommand *)command;
-- (nonnull NSString *)getSdkVersion:(CDVInvokedUrlCommand *)command;
-- (BOOL)clearTPNSCache:(CDVInvokedUrlCommand *)command;
+- (void)setBadge:(CDVInvokedUrlCommand *_Nonnull)command;
+- (void)getSdkVersion:(CDVInvokedUrlCommand *_Nonnull)command;
+- (void)clearTPNSCache:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 查询设备通知权限
-- (void)deviceNotificationIsAllowed:(CDVInvokedUrlCommand *)command;
+- (void)deviceNotificationIsAllowed:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 日志上报接口
-- (void)uploadLogCompletionHandler:(CDVInvokedUrlCommand *)command;
+- (void)uploadLogCompletionHandler:(CDVInvokedUrlCommand *_Nonnull)command;
 
 
 /// 接下来的要在注册成功后使用

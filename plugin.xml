@@ -19,7 +19,7 @@
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="tpns">
-                <param name="ios-package" value="tpns"/>
+                <param name="ios-package" value="TPNSPlugin"/>
                 <param name="onload" value="true" />
             </feature>
             <preference name="TPNS_ACCESS_ID" value="$TPNS_ACCESS_ID"/>
