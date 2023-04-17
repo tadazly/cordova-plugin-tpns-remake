@@ -1,0 +1,28 @@
+{
+  "name": "cordova-plugin-tpns-remake",
+  "version": "1.0.0",
+  "description": "Remake the tpns cordova plugin due to old version doesn't contain ios :)",
+  "cordova": {
+    "id": "cordova-plugin-tpns-remake",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tadazly/cordova-plugin-tpns-remake.git"
+  },
+  "keywords": [
+    "cordova",
+    "tpns",
+    "sdk",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "author": "tadazly",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/tadazly/cordova-plugin-tpns-remake/issues"
+  },
+  "homepage": "https://github.com/tadazly/cordova-plugin-tpns-remake#readme"
+}

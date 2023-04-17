@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-tpns-remake" version="1.0.0">
+    <name>TPNSCordovaPlugin</name>
+    <description>TPNS Cordova Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,tpns,sdk</keywords>
+    <repo>https://github.com/tadazly/cordova-plugin-tpns-remake.git</repo>
+
+    <preference name="TPNS_ACCESS_ID" />
+    <preference name="TPNS_ACCESS_KEY" />
+
+    <js-module src="www/tpns.js" name="tpns">
+        <clobbers target="tpns" />
+        <clobbers target="cordova.plugins.tpns" />
+    </js-module>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="tpns">
+                <param name="ios-package" value="tpns"/>
+                <param name="onload" value="true" />
+            </feature>
+            <preference name="TPNS_ACCESS_ID" value="$TPNS_ACCESS_ID"/>
+            <preference name="TPNS_ACCESS_KEY" value="$TPNS_ACCESS_KEY"/>
+        </config-file>
+
+        <!-- Plugin source code -->
+        <header-file src="src/ios/TPNSPlugin.h" />
+        <source-file src="src/ios/TPNSPlugin.m" />
+
+        <!-- TPNS SDK Official -->
+        <header-file src="src/ios/libs/TpnsSDK/XGPush.h" />
+        <header-file src="src/ios/libs/TpnsSDK/XGPushPrivate.h" />
+        <source-file src="src/ios/libs/TpnsSDK/libXG-SDK-Cloud.a" framework="true" />
+        <source-file src="src/ios/libs/TpnsSDK/XGPushStatistics/XGMTACloud.framework" framework="true" />
+        <source-file src="src/ios/libs/TpnsSDK/InAppMessage/XGInAppMessage.framework" framework="true" />
+
+        <!-- Other required frameworks -->
+        <framework src="CoreTelephony.framework" />
+        <framework src="SystemConfiguration.framework" />
+        <framework src="UserNotifications.framework" />
+        <framework src="libz.tbd" />
+        <framework src="CoreData.framework" />
+        <framework src="CFNetwork.framework" />
+        <framework src="libc++.tbd" />
+    </platform>
+</plugin>
