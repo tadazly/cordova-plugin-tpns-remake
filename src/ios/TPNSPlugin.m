@@ -17,7 +17,7 @@
     }
     else
     {
-        self.tpnsAccessID = TPNS_ACCESS_ID;
+        self.tpnsAccessID = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];
     }
 
     if ([command.arguments count] > 1)
@@ -26,7 +26,7 @@
     }
     else
     {
-        self.tpnsAccessKey = TPNS_ACCESS_KEY;
+        self.tpnsAccessKey = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_KEY"];
     }
 }
 
@@ -42,7 +42,7 @@
     }
     // [[XGPush defaultManager] configureClusterDomainName:currentDomainName];
     //过滤配置的DomainName与AccessID不匹配问题
-    NSInteger accessID = self.tpnsAccessID != 0 ? self.tpnsAccessID : TPNS_ACCESS_ID;
+    NSInteger accessID = self.tpnsAccessID != 0 ? self.tpnsAccessID : [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];;
     if (![TPNSCommonMethod isMatchingDomainName:currentDomainName withAccessID:accessID]) {
         NSLog(@"%@",NSLocalizedString(@"domainname_accessid_not_match", nil));
     } else {
@@ -58,11 +58,11 @@
         [TPNSCommonMethod showAlertViewWithText:message];
         return;
     }
-    NSInterger accessID = TPNS_ACCESS_ID;
+    NSInterger accessID = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];
     if (self.tpnsAccessID != 0) {
         accessID = self.tpnsAccessID;
     }
-    NSString *accessKey = TPNS_ACCESS_KEY;
+    NSString *accessKey = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_KEY"];
     if (self.tpnsAccessKey != nil && ![self.tpnsAccessKey isEqualToString:@""]) {
         accessKey = self.tpnsAccessKey;
     }
