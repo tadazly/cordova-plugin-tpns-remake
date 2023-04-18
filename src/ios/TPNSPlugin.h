@@ -12,11 +12,17 @@
 @property (nonatomic, strong, nonnull) NSString *currentDomainName;
 @property (nonatomic, strong, nullable) NSString *currentStartCallbackId;
 @property (nonatomic, strong, nullable) NSString *currentStopCallbackId;
+@property (nonatomic, strong, nullable) NSString *notificationCallbackId;
+@property (nonatomic, strong, nullable) NSString *responseCallbackId;
 @property (nonatomic, assign) NSInteger tpnsAccessID;
 @property (nonatomic, assign, nullable) NSString *tpnsAccessKey;
 @property (nonatomic, assign) BOOL isTPNSRegistSuccess;
 @property (nonatomic, assign) BOOL launchTag;
 
+/// 添加接收消息监听
+- (void)addNotificationListener:(CDVInvokedUrlCommand *_Nonnull)command;
+/// 添加点击消息监听
+- (void)addResponseListener:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 设置开启关闭调试
 - (void)setEnableDebug:(CDVInvokedUrlCommand *_Nonnull)command;
 /// 可选手动设置accessID和key

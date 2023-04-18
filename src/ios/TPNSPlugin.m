@@ -2,6 +2,17 @@
 
 @implementation TPNSPlugin
 
+
+- (void)addNotificationListener:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    self.notificationCallbackId = command.callbackId;
+}
+
+- (void)addResponseListener:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    self.responseCallbackId = command.callbackId;
+}
+
 - (void)setEnableDebug:(CDVInvokedUrlCommand *)command
 {
     BOOL enabled = [[command.arguments objectAtIndex:0] boolValue];
@@ -12,7 +23,7 @@
 {   
     if ([command.arguments count] > 0)
     {
-        self.tpnsAccessID = [command.arguments objectAtIndex:0];
+        self.tpnsAccessID = [[command.arguments objectAtIndex:0] integerValue];
     }
     else
     {
@@ -91,7 +102,7 @@
 
 - (void)setBadge:(CDVInvokedUrlCommand *)command
 {
-    NSInteger value = [command.arguments objectAtIndex:0];
+    NSInteger value = [[command.arguments objectAtIndex:0] integerValue];
     [[XGPush defaultManager] setBadge:value];
 }
 
@@ -186,11 +197,11 @@
     //设置是否注册成功
     if (!error) {
         self.isTPNSRegistSuccess = false;
-        NSDictionary *response = @{
+        response = @{
             @"errorCode": @(0)
         };
     } else {
-        NSDictionary *response = @{
+        response = @{
             @"errorCode": @(1001),
             @"errorMsg": @"注销回掉内失败"
         };
@@ -205,6 +216,7 @@
 /// @note 此回调为前台收到通知消息及所有状态下收到静默消息的回调（消息点击需使用统一点击回调）
 /// 区分消息类型说明：xg字段里的msgtype为1则代表通知消息,msgtype为2则代表静默消息,msgtype为9则代表本地通知
 - (void)xgPushDidReceiveRemoteNotification:(nonnull id)notification withCompletionHandler:(nullable void (^)(NSUInteger))completionHandler {
+    NSLog(@"[TPNS] remote notification");
     NSDictionary *notificationDic = nil;
     if ([notification isKindOfClass:[UNNotification class]]) {
         notificationDic = ((UNNotification *)notification).request.content.userInfo;
@@ -213,20 +225,31 @@
         notificationDic = notification;
         completionHandler(UIBackgroundFetchResultNewData);
     }
-    NSLog(@"receive notification dic: %@", notificationDic);
+    NSLog(@"remote notification dic: %@", notificationDic);
+    if (self.notificationCallbackId != 0) {
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:notificationDic];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:self.notificationCallbackId];
+    }
 }
 
 /// 统一点击回调
 /// @param response 如果iOS 10+/macOS 10.14+则为UNNotificationResponse，低于目标版本则为NSDictionary
 /// 区分消息类型说明：xg字段里的msgtype为1则代表通知消息,msgtype为9则代表本地通知
 - (void)xgPushDidReceiveNotificationResponse:(nonnull id)response withCompletionHandler:(nonnull void (^)(void))completionHandler {
-    NSLog(@"[TPNS Demo] click notification");
+    NSLog(@"[TPNS] click notification");
+    NSDictionary *notificationDic = nil;
     if ([response isKindOfClass:[UNNotificationResponse class]]) {
         /// iOS10+消息体获取
-        NSLog(@"notification dic: %@", ((UNNotificationResponse *)response).notification.request.content.userInfo);
+        notificationDic = ((UNNotificationResponse *)response).notification.request.content.userInfo;
+        NSLog(@"click notification dic: %@", ((UNNotificationResponse *)response).notification.request.content.userInfo);
     } else if ([response isKindOfClass:[NSDictionary class]]) {
         /// 低于iOS10消息体获取
-        NSLog(@"notification dic: %@", response);
+        notificationDic = response;
+        NSLog(@"click notification dic: %@", response);
+    }
+    if (self.responseCallbackId != 0) {
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:notificationDic];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:self.responseCallbackId];
     }
     completionHandler();
 }

@@ -8,6 +8,14 @@ module.exports = {
         SH: "tpns.sh.tencent.com"
     },
 
+    addNotificationListener: function(onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "addNotificationListener", []);
+    },
+
+    addResponseListener: function(onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "addResponseListener", []);
+    },
+
     setEnableDebug: function(enabled, onSuccess, onError) {
         exec(onSuccess, onError, "tpns", "setEnableDebug", [enabled]);
     },

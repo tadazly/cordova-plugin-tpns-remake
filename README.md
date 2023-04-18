@@ -30,14 +30,15 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
 
 ### 使用方式
 
-1. （可选，默认开启）[设置Debug输出](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
-2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L19)
-3.  [注册并开启TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)，在回掉函数中获得TPNS Token(XgToken)
+1. （可选，默认开启）[设置Debug输出](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L19)
+2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)
+3. （可选）[添加收到通知、点击通知的监听](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
+4.  [注册并开启TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)，在回调函数中获得TPNS Token(XgToken)
 
 ### 接口说明
 ``` typescript
     /**
-     *  回掉函数的参数类型
+     *  注册/注销回调函数的参数类型
      */
     type response = {
         /** 0 为正常， > 0 为报错 **/
@@ -50,6 +51,48 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
         xgToken?: number,
     }
 
+    type alertObject = {
+        title: string,
+        subtitle: string,
+        body: string,
+        sound: string
+    }
+
+    type apsObject = {
+        alert: alertObject,
+        badge_add_num: number,
+        badge_type: number,
+        category: string,
+        mutable-content: number,
+        sound: string
+    }
+
+    type xgObject = {
+        bid: number,
+        groupId: string,
+        guid: number,
+        msgid: number,
+        msgtype: number,
+        pushChannel: number,
+        pushTime: number,
+        showType: number,
+        source: number,
+        targettype: number,
+        templateId: string,
+        tpnsCollapseId: number,
+        traceId: string,
+        ts: number,
+        xgToken: string
+    }
+
+    /**
+     *  消息、点击消息回调参数类型
+     */
+    type notification = {
+        aps: apsObject,
+        xg: xgObject
+    }
+
     /**
      *  域名接口
      */ 
@@ -59,6 +102,16 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
         SGP = "tpns.sgp.tencent.com",
         SH = "tpns.sh.tencent.com"
     }
+
+    /**
+     *  添加收到通知监听
+     */
+    function addNotificationListener(onSuccess: (data: notification) => void): void;
+
+    /**
+     *  添加点击通知监听
+     */
+    function addResponseListener(onSuccess: (data: notification) => void): void;
 
     /**
      *  设置Debug输出（非js-console输出，是Xcode的控制台输出）
