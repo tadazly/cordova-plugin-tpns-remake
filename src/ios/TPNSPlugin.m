@@ -16,7 +16,7 @@
     }
     else
     {
-        self.tpnsAccessID = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"];
+        self.tpnsAccessID = [[[self.commandDelegate settings] objectForKey:@"tpns_access_id"] integerValue];
     }
 
     if ([command.arguments count] > 1)
@@ -25,7 +25,7 @@
     }
     else
     {
-        self.tpnsAccessKey = [[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_KEY"];
+        self.tpnsAccessKey = [[self.commandDelegate settings] objectForKey:@"tpns_access_key"];
     }
 }
 
@@ -39,14 +39,8 @@
             currentDomainName = arg;
         }
     }
-    // [[XGPush defaultManager] configureClusterDomainName:currentDomainName];
-    //过滤配置的DomainName与AccessID不匹配问题
-    NSInteger accessID = self.tpnsAccessID != 0 ? self.tpnsAccessID : [[[self.commandDelegate settings] objectForKey:@"TPNS_ACCESS_ID"] integerValue];
-    // if (![TPNSCommonMethod isMatchingDomainName:currentDomainName withAccessID:accessID]) {
-    //     NSLog(@"%@",NSLocalizedString(@"domainname_accessid_not_match", nil));
-    // } else {
-    //     self.currentDomainName = currentDomainName;
-    // }
+    self.currentDomainName = currentDomainName;
+    /// 设置后调用startXG
 }
 
 - (void)startXG:(CDVInvokedUrlCommand *)command
