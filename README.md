@@ -10,7 +10,7 @@
 ### 在项目中安装插件
 
 ``` shell
-cordova plugin add https://github.com/tadazly/cordova-plugin-tpns-remake.git --VARIABLE TPNS_ACCESS_ID=1600007893 TPNS_ACCESS_KEY=IX4BGYYG8L4L
+cordova plugin add https://github.com/tadazly/cordova-plugin-tpns-remake.git --variable TPNS_ACCESS_ID=1600007893 --variable TPNS_ACCESS_KEY=IX4BGYYG8L4L
 ```
 TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基础配置 中获取自行提换
 
