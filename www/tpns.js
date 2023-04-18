@@ -13,7 +13,7 @@ module.exports = {
     },
 
     setAccessInfo: function(accessID, accessKey, onSuccess, onError) {
-        exec(onSuccess, onError, "tpns", "setAccessInfo", [enabled]);
+        exec(onSuccess, onError, "tpns", "setAccessInfo", [accessID, accessKey]);
     },
 
     setConfigHost: function(host, onSuccess, onError) {
@@ -36,7 +36,7 @@ module.exports = {
         exec(onSuccess, onError, "tpns", "setBadge", [value]);
     },
 
-    getSdkVersion: function(value, onSuccess, onError) {
+    getSdkVersion: function(onSuccess, onError) {
         exec(onSuccess, onError, "tpns", "getSdkVersion", []);
     },
 

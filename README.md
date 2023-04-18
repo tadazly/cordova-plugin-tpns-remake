@@ -1,6 +1,6 @@
 # cordova-plugin-tpns-remake
 
-为Cordova项目接入新版本TPNS SDK的插件
+为Cordova项目接入新版本TPNS SDK
 
 ## TPNS SDK版本
 - iOS SDK          v1.3.9.5
@@ -27,3 +27,95 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
         1. 项目配置选中你的TARGETS => app => Signing & Capabilities
         2. 点击 +Capability 按钮
         3. 搜索并添加 Push Notifications、Background Modes(勾选Remote notifications)、Time Sensitive Notifications
+
+### 使用方式
+
+1. （可选，默认开启）[设置Debug输出](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
+2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L19)
+3.  [注册并开启TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)，在回掉函数中获得TPNS Token(XgToken)
+
+### 接口说明
+``` typescript
+    /**
+     *  回掉函数的参数类型
+     */
+    type response = {
+        /** 0 为正常， > 0 为报错 **/
+        errorCode: number,
+        /** 大于0时有错误信息 **/
+        errorMsg?: string,
+        /** APNS TOKEN **/
+        deviceToken?: number,
+        /** TPNS TOKEN **/
+        xgToken?: number,
+    }
+
+    /**
+     *  域名接口
+     */ 
+    enum TPNS_DOMAIN {
+        GZ_DEFAULT = "tpns.tencent.com",
+        HK = "tpns.hk.tencent.com",
+        SGP = "tpns.sgp.tencent.com",
+        SH = "tpns.sh.tencent.com"
+    }
+
+    /**
+     *  设置Debug输出（非js-console输出，是Xcode的控制台输出）
+     */
+    function setEnableDebug(enabled: boolean): void;
+
+    /**
+     *  （不推荐，仅测试时使用）在代码中设置accessID，accessKey，设置完成后调用startXG
+     */
+    function setAccessInfo(accessID: number, accessKey: string): void;
+
+    /**
+     *  配置域名接口，不配置默认使用 TPNS_DOMAIN.SH
+     *  配置完成后调用startXG
+     */ 
+    function setConfigHost(host: TPNS_DOMAIN): void;
+
+    /**
+     *  注册并开启TPNS
+     */
+    function startXG(
+        onSuccess: (data: response) => void, 
+        onError: (data: response) => void
+    ): void
+
+    /**
+     *  注销TPNS
+     */
+    function stopXGG(
+        onSuccess: (data: response) => void, 
+        onError: (data: response) => void
+    ): void
+
+    /**
+     *  读取TOKEN，需要成功注册开启后使用
+     */
+    function getToken(onSuccess: (token: string) => void): void;
+
+    /**
+     *  设置角标
+     */
+    function setBadge(value): void;
+
+    function getSdkVersion(onSuccess: (sdkVersion: string) => void): void;
+
+    function clearTPNSCache(): void;
+
+    /**
+     *  获取设备通知是否开启
+     */
+    function deviceNotificationIsAllowed(onSuccess: (isAllowed: boolean) => void): void;
+
+    /**
+     *  上传Log日志
+     */
+    function uploadLogCompletionHandler(
+        onSuccess: (data: response) => void, 
+        onError: (data: response) => void
+    ): void
+```
