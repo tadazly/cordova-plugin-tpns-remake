@@ -1,7 +1,22 @@
 #import "TPNSPlugin.h"
+// #import "AppDelegate.h"
+
+// @implementation AppDelegate (TPNSPlugin)
+
+// - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+// {
+//     NSLog(@"AppDelegate APNS deviceToken: %@", deviceToken.description);
+//     [[NSNotificationCenter defaultCenter] postNotificationName:@"CDVApnsDeviceTokenReceivedNotification" object:deviceToken];
+// }
+
+// @end
+
 
 @implementation TPNSPlugin
-
+// - (void)pluginInitialize {
+//     [super pluginInitialize];
+//     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRegisterForRemoteNotificationsWithDeviceToken:) name:@"CDVApnsDeviceTokenReceivedNotification" object:nil];
+// }
 
 - (void)addNotificationListener:(CDVInvokedUrlCommand *_Nonnull)command
 {
@@ -58,8 +73,15 @@
 {        
     if (self.isTPNSRegistSuccess) {
         //已经注册成功，避免重复注册；如需重新注册，先注销，后注册。
-        NSString *message = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"register_app", nil), NSLocalizedString(@"success", nil)];
-        // [TPNSCommonMethod showAlertViewWithText:message];
+        NSDictionary *response = @{
+            @"deviceToken": self.deviceToken != nil ? self.deviceToken : @"",
+            @"xgToken": self.xgToken != nil ? self.xgToken : @"",
+            @"errorCode": @(0)
+        };
+        NSLog(@"[TPNSPlugin StartXG] deviceToken: %@ xgToken: %@", [response objectForKey:@"deviceToken"], [response objectForKey:@"xgToken"]);
+
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
         return;
     }
     NSInteger accessID = [[[self.commandDelegate settings] objectForKey:@"tpns_access_id"] integerValue];
@@ -79,7 +101,7 @@
     self.currentStartCallbackId = command.callbackId;
     /// 如果通知权限弹框已展示过，则启动时调用注册
     /// 启动TPNS服务
-    [[XGPush defaultManager] startXGWithAccessID:accessID accessKey:accessKey delegate:self];
+    [[XGPush defaultManager] startXGWithAccessID:(uint32_t)accessID accessKey:accessKey delegate:self];
 
     /// 角标数目清零,通知中心清空
     if ([XGPush defaultManager].xgApplicationBadgeNumber > 0) {
@@ -137,6 +159,201 @@
     }];
 }
 
+- (void)addLocalNotificationByTimestamp:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    BOOL (^hasProperty)(NSObject *, NSString *) = ^BOOL(NSObject *object, NSString *propertyName) {
+        return [object respondsToSelector:NSSelectorFromString(propertyName)];
+    };
+    
+    NSDictionary *jsContent = [command.arguments objectAtIndex:0];
+    double jsTimestamp = [[command.arguments objectAtIndex:1] doubleValue];
+    NSString *requestId = [NSString stringWithFormat:@"tpns_local%.0f", jsTimestamp];
+    
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    
+    for (NSString *key in jsContent) {
+        if ([key isEqualToString:@"requestId"]) {
+            requestId = jsContent[key];
+        }
+        else if (hasProperty(content, key)) {
+            [content setValue:[NSString localizedUserNotificationStringForKey:jsContent[key] arguments:nil] forKey:key];
+        }
+    }
+    
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:(jsTimestamp / 1000)];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:date];
+    UNCalendarNotificationTrigger* trigger = [UNCalendarNotificationTrigger
+           triggerWithDateMatchingComponents:components repeats:NO];
+    
+    UNNotificationRequest* request = [UNNotificationRequest
+           requestWithIdentifier:requestId content:content trigger:trigger];
+    
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+       if (error != nil) {
+           NSLog(@"%@", error.localizedDescription);
+       }
+    }];
+    
+    CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:requestId];
+    [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
+}
+
+- (void)addLocalNotificationByDate:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    BOOL (^hasProperty)(NSObject *, NSString *) = ^BOOL(NSObject *object, NSString *propertyName) {
+        return [object respondsToSelector:NSSelectorFromString(propertyName)];
+    };
+    
+    NSDictionary *jsContent = [command.arguments objectAtIndex:0];
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    
+    NSInteger year = [[command.arguments objectAtIndex:1] integerValue];
+    NSInteger month = [[command.arguments objectAtIndex:2] integerValue];
+    NSInteger day = [[command.arguments objectAtIndex:3] integerValue];
+    NSInteger hour = [[command.arguments objectAtIndex:4] integerValue];
+    NSInteger minute = [[command.arguments objectAtIndex:5] integerValue];
+    NSInteger second = [[command.arguments objectAtIndex:6] integerValue];
+
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    components.year = year;
+    components.month = month;
+    components.day = day;
+    components.hour = hour;
+    components.minute = minute;
+    components.second = second;
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDate *date = [calendar dateFromComponents:components];
+    NSTimeInterval timestamp = [date timeIntervalSince1970];
+    
+    UNCalendarNotificationTrigger* trigger = [UNCalendarNotificationTrigger
+           triggerWithDateMatchingComponents:components repeats:NO];
+    
+    NSString *requestId = [NSString stringWithFormat:@"tpns_local%.0f", timestamp];
+    
+    for (NSString *key in jsContent) {
+        if ([key isEqualToString:@"requestId"]) {
+            requestId = jsContent[key];
+        }
+        else if (hasProperty(content, key)) {
+            [content setValue:[NSString localizedUserNotificationStringForKey:jsContent[key] arguments:nil] forKey:key];
+        }
+    }
+    
+    UNNotificationRequest* request = [UNNotificationRequest
+           requestWithIdentifier:requestId content:content trigger:trigger];
+    
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+       if (error != nil) {
+           NSLog(@"%@", error.localizedDescription);
+       }
+    }];
+    
+    CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:requestId];
+    [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
+}
+
+- (void)removeLocalNotificationByRequestIds:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    NSArray *requestIds = [command.arguments objectAtIndex:0];
+        
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    [center removePendingNotificationRequestsWithIdentifiers:requestIds];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Notification requests removed"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)removeAllLocalNotifications:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    [center removeAllPendingNotificationRequests];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Notification requests removed all"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)getDeliveredNotifications:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        
+    [center getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> *notifications) {
+        NSMutableArray *deliveredNotifications = [NSMutableArray new];
+        
+        for (UNNotification *notification in notifications) {
+            UNNotificationContent *content = notification.request.content;
+            NSDictionary *notificationInfo = @{
+                @"requestId": notification.request.identifier,
+                @"title": content.title,
+                @"subtitle": content.subtitle,
+                @"body": content.body,	
+                @"badge": content.badge,
+                @"userInfo": content.userInfo
+            };
+            [deliveredNotifications addObject:notificationInfo];
+        }
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:deliveredNotifications];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+}
+
+- (void)removeDeliveredNotificationsByRequestIds:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    NSArray *requestIds = [command.arguments objectAtIndex:0];
+        
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    [center removeDeliveredNotificationsWithIdentifiers:requestIds];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Delivered notifications removed"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)removeAllDeliveredNotifications:(CDVInvokedUrlCommand *_Nonnull)command
+{
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    [center removeAllDeliveredNotifications];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Delivered notifications removed all"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+// - (void)startAPNS:(CDVInvokedUrlCommand *_Nonnull)command
+// {
+//     self.apnsCallbackId = command.callbackId;
+//     UIApplication *application = [UIApplication sharedApplication];
+//     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+//     UNAuthorizationOptions options = UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+
+//     [center requestAuthorizationWithOptions:options completionHandler:^(BOOL granted, NSError * _Nullable error) {
+//         if (granted) {
+//             dispatch_async(dispatch_get_main_queue(), ^{
+//                 [application registerForRemoteNotifications];
+//             });
+//         } else {
+//             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"User denied notification permission"];
+//             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+//         }
+//     }];
+// }
+
+// - (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSNotification *)notification {
+//     NSData *deviceToken = [notification object];
+//     const unsigned *tokenBytes = [deviceToken bytes];
+//     NSString *token = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+//                          ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+//                          ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+//                          ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+//     if (self.apnsCallbackId != 0) {
+//         CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
+//         [self.commandDelegate sendPluginResult:commandResult callbackId:self.apnsCallbackId];
+//         self.apnsCallbackId = nil;
+//     }
+//     NSLog(@"APNS deviceToken translate: %@", token);
+// }
+
 /********XGPush代理，提供注册机反注册结果回调，消息接收机消息点击回调，清除角标回调********/
 
 #pragma mark *** XGPushDelegate ***
@@ -160,6 +377,9 @@
             @"xgToken": xgToken != nil ? xgToken : @"",
             @"errorCode": @(0)
         };
+        self.deviceToken = deviceToken;
+        self.xgToken = xgToken;
+        NSLog(@"[TPNSPlugin StartXG] deviceToken: %@ xgToken: %@", [response objectForKey:@"deviceToken"], [response objectForKey:@"xgToken"]);
     } else {
         response = @{
             @"errorCode": @(1001),
@@ -194,12 +414,14 @@
     NSString *errorStr = !error ? NSLocalizedString(@"success", nil) : NSLocalizedString(@"failed", nil);
     NSString *message = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"unregister_app", nil), errorStr];
 
-    //设置是否注册成功
+    //设置是否注销成功
     if (!error) {
         self.isTPNSRegistSuccess = false;
         response = @{
             @"errorCode": @(0)
         };
+        self.deviceToken = nil;
+        self.xgToken = nil;
     } else {
         response = @{
             @"errorCode": @(1001),

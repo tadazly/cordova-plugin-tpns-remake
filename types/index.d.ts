@@ -1,4 +1,4 @@
-namespace tpns {    
+namespace tpns {
     /**
      *  注册/注销回调函数的参数类型
      */
@@ -56,8 +56,19 @@ namespace tpns {
     }
 
     /**
+     *  ios内消息对象结构
+     */
+    type iosNotificationObject = {
+        requestId: string,
+        title: string,
+        subtitle: string,
+        body: string,
+        badge: number,
+        userInfo: object
+    }
+    /**
      *  域名接口
-     */ 
+     */
     enum TPNS_DOMAIN {
         GZ_DEFAULT = "tpns.tencent.com",
         HK = "tpns.hk.tencent.com",
@@ -88,14 +99,14 @@ namespace tpns {
     /**
      *  配置域名接口，不配置默认使用 TPNS_DOMAIN.SH
      *  配置完成后调用startXG
-     */ 
+     */
     function setConfigHost(host: TPNS_DOMAIN): void;
 
     /**
      *  注册并开启TPNS
      */
     function startXG(
-        onSuccess: (data: response) => void, 
+        onSuccess: (data: response) => void,
         onError: (data: response) => void
     ): void
 
@@ -103,7 +114,7 @@ namespace tpns {
      *  注销TPNS
      */
     function stopXGG(
-        onSuccess: (data: response) => void, 
+        onSuccess: (data: response) => void,
         onError: (data: response) => void
     ): void
 
@@ -136,7 +147,59 @@ namespace tpns {
      *  上传Log日志
      */
     function uploadLogCompletionHandler(
-        onSuccess: (data: response) => void, 
+        onSuccess: (data: response) => void,
         onError: (data: response) => void
     ): void
+
+    /**
+     *  添加指定时间戳的通知
+     * @param content 消息对象
+     * @param timestamp 时间戳，毫秒
+     * @param onSuccess 返回一个requestId
+     */
+    function addLocalNotificationByTimestamp(
+        content: Object,
+        timestamp: number,
+        onSuccess: (requestId: number) => void
+    ): void
+
+    /**
+     *  添加指定日期的通知
+     * @param content 消息对象
+     * @param date Date对象
+     * @param onSuccess 返回一个requestId
+     */
+    function addLocalNotificationByTimestamp(
+        content: Object,
+        timestamp: number,
+        onSuccess: (requestId: number) => void
+    ): void
+
+    /**
+     *  通过requestId数组删除已经添加但未推送的消息
+     * @param requestIds 
+     */
+    function removeLocalNotificationByRequestIds(requestIds: number[]): void;
+
+    /**
+     *  删除所有已经添加但未推送的消息
+     */
+    function removeAllLocalNotifications(): void;
+
+    /**
+     *  获取已经成功推送的通知（通知中心显示的）
+     * @param onSuccess 
+     */
+    function getDeliveredNotifications(onSuccess: (notifications: iosNotificationObject[]) => void): void
+
+    /**
+     *  通过requestId数组删除已经成功推送的通知
+     * @param requestIds 
+     */
+    function removeDeliveredNotificationsByRequestIds(requestIds: number[]): void;
+
+    /**
+     *  删除所有已经成功推送的通知
+     */
+    function removeAllDeliveredNotifications(): void;
 }

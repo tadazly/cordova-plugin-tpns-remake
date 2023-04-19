@@ -59,4 +59,35 @@ module.exports = {
     uploadLogCompletionHandler: function(onSuccess, onError) {
         exec(onSuccess, onError, "tpns", "uploadLogCompletionHandler", []);
     },
+
+    addLocalNotificationByTimestamp: function(content, timestamp, onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "addLocalNotificationByTimestamp", [content, timestamp]);
+    },
+
+    addLocalNotificationByDate: function(content, date, onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "addLocalNotificationByDate", [
+            content,
+            date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()
+        ]);
+    },
+
+    removeLocalNotificationByRequestIds: function(requestIds, onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "removeLocalNotificationByRequestIds", [requestIds]);
+    },
+    
+    removeAllLocalNotifications: function(onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "removeAllLocalNotifications", []);
+    },
+    
+    getDeliveredNotifications: function(onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "getDeliveredNotifications", []);
+    },
+    
+    removeDeliveredNotificationsByRequestIds: function(requestIds, onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "removeDeliveredNotificationsByRequestIds", [requestIds]);
+    },
+    
+    removeAllDeliveredNotifications: function(onSuccess, onError) {
+        exec(onSuccess, onError, "tpns", "removeAllDeliveredNotifications", []);
+    }
 }

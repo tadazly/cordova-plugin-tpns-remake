@@ -31,11 +31,68 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
 ### 使用方式
 
 1. （可选，默认开启）[设置Debug输出](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L19)
-2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)
-3. （可选）[添加收到通知、点击通知的监听](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
-4.  [注册并开启TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)，在回调函数中获得TPNS Token(XgToken)
 
-### 接口说明
+``` javascript
+    tpns.setEnableDebug(true);
+```
+
+2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)
+
+``` javascript
+    tpns.setConfigHost(tpns.TPNS_DOMAIN.SH);
+```
+
+3. （可选）[添加收到通知、点击通知的监听](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
+
+``` javascript
+    // 添加收到消息时触发的回调函数
+    tpns.addNotificationListener((data) => {
+        if (data && data.aps) {
+            // ...
+        }
+        if (data && data.xg) {
+            // ...
+        }
+    });
+    // 添加点击消息时触发的回调函数
+    tpns.addResponseListener((data) => {
+        if (data && data.aps) {
+            // ...
+        }
+        if (data && data.xg) {
+            // ...
+        }
+    });
+```
+
+4. &nbsp;[注册并开启TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L31)，在回调函数中获得TPNS Token(XgToken)
+
+``` javascript
+    // !!! 上面几步都需要在执行starXG前调用哦
+    tpns.startXG((data) => {
+        if (!data.errorCode) {
+            console.log(`注册成功！`);
+            console.log(`TPNS推送用token / xgToken：${data.xgToken}`);
+            console.log(`APNS token / deviceToken：${data.deviceToken}`);
+            // ...
+        }
+    })
+```
+
+5. &nbsp;[注销TPNS](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L35)
+
+``` javascript
+    tpns.stopXG((data) => {
+        if (!data.errorCode) {
+            console.log(`注销成功！`);
+            // ...
+        }
+    })
+```
+
+
+### [API](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/types/index.d.ts#L58)&nbsp;说明
+
 ``` typescript
     /**
      *  注册/注销回调函数的参数类型
