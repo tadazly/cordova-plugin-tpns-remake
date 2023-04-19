@@ -288,7 +288,7 @@
                 @"requestId": notification.request.identifier,
                 @"title": content.title,
                 @"subtitle": content.subtitle,
-                @"body": content.body,	
+                @"body": content.body,
                 @"badge": content.badge,
                 @"userInfo": content.userInfo
             };
