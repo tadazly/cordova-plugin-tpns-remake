@@ -1,4 +1,4 @@
-namespace tpns {
+declare namespace tpns {
     /**
      *  注册/注销回调函数的参数类型
      */
