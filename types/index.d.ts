@@ -8,9 +8,9 @@ declare namespace tpns {
         /** 大于0时有错误信息 **/
         errorMsg?: string,
         /** APNS TOKEN **/
-        deviceToken?: number,
+        deviceToken?: string,
         /** TPNS TOKEN **/
-        xgToken?: number,
+        xgToken?: string,
     }
 
     type alertObject = {
@@ -104,18 +104,18 @@ declare namespace tpns {
 
     /**
      *  注册并开启TPNS
+     *  data.errorCode 0 成功
      */
     function startXG(
-        onSuccess: (data: response) => void,
-        onError: (data: response) => void
+        onSuccess: (data: response) => void
     ): void
 
     /**
      *  注销TPNS
+     *  data.errorCode 0 成功
      */
     function stopXGG(
-        onSuccess: (data: response) => void,
-        onError: (data: response) => void
+        onSuccess: (data: response) => void
     ): void
 
     /**
