@@ -9,10 +9,29 @@
 ## 接入说明
 ### 在项目中安装插件
 
+- 安装时使用的 TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 需要从 ‘腾讯云任务中心=>App推送管理=>基础配置’ 中获取自行提换
+
+1. 通过npm安装
+``` shell
+cordova plugin add cordova-plugin-tpns-remake --variable TPNS_ACCESS_ID=1600007893 --variable TPNS_ACCESS_KEY=IX4BGYYG8L4L
+```
+
+2. 通过git链接安装
 ``` shell
 cordova plugin add https://github.com/tadazly/cordova-plugin-tpns-remake.git --variable TPNS_ACCESS_ID=1600007893 --variable TPNS_ACCESS_KEY=IX4BGYYG8L4L
 ```
-TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基础配置 中获取自行提换
+
+3. 通过本地路径安装
+``` shell
+cordova plugin add /local/path/to/cordova-plugin-tpns-remake --variable TPNS_ACCESS_ID=1600007893 --variable TPNS_ACCESS_KEY=IX4BGYYG8L4L
+```
+
+- 本地插件调试开发（改插件代码时可以用）
+
+首先将插件clone到本地，然后使用本地路径方式安装并传入 --link 参数，会将插件目录中的代码链接至Xcode项目
+``` shell
+cordova plugin add /local/path/to/cordova-plugin-tpns-remake --variable TPNS_ACCESS_ID=1600007893 --variable TPNS_ACCESS_KEY=IX4BGYYG8L4L --link
+```
 
 ### 项目配置
 - iOS
@@ -30,19 +49,21 @@ TPNS_ACCESS_ID 和 TPNS_ACCESS_KEY 腾讯云任务中心=>App推送管理=>基�
 
 ### 使用方式
 
+插件对象可以在js代码中使用[tpns](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/plugin.xml#L14)或者[cordova.plugins.tpns](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/plugin.xml#L15)调用
+
 1. （可选，默认开启）[设置Debug输出](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L19)
 
 ``` javascript
     tpns.setEnableDebug(true);
 ```
 
-2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)
+2. （可选，默认使用上海域名）[设置域名接口](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L23)，传入[域名字符串](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/types/index.d.ts#L72-L77)
 
 ``` javascript
     tpns.setConfigHost(tpns.TPNS_DOMAIN.SH);
 ```
 
-3. （可选）[添加收到通知、点击通知的监听](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)
+3. （可选）[添加收到通知、点击通知的监听](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/www/tpns.js#L11)，返回值的[结构参考API](https://github.com/tadazly/cordova-plugin-tpns-remake/blob/main/types/index.d.ts#L23-L56)
 
 ``` javascript
     // 添加收到消息时触发的回调函数
